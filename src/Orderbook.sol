@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {OrderStructs} from "./lib/OrderStructs.sol";
 
 // for testing
 // contract Token1 is ERC20 {
@@ -43,8 +44,8 @@ contract Orderbook {
     // Order[] public bidOrders;
     // Order[] public askOrders;
 
-    function fulfillOrder(Order memory order) internal {
+    function fulfillOrder(OrderStructs.Maker memory makerOrder) internal {
         // @todo the flow of fulfilling an order
-        order.isFilled = true;
+        // makerOrder.isFilled = true;
     }
 }

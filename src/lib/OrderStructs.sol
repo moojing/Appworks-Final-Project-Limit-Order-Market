@@ -11,10 +11,11 @@ library OrderStructs {
     /**
      * @notice Maker is the struct for a maker order.
      * @param orderType Order type (i.e. 0 = BID, 1 = ASK)
+     * @param isFulfilled Whether the order has been fulfilled
      * @param globalNonce Global user order nonce for maker orders
      * @param subsetNonce Subset nonce (shared across bid/ask maker orders)
      * @param orderNonce Order nonce (it can be shared across bid/ask maker orders)
-     * @param strategyId Strategy id
+     // param strategyId Strategy id
      * @param collectionType Collection type (i.e. 0 = ERC721, 1 = ERC1155)
      * @param collection Collection address
      * @param currency Currency address (@dev address(0) = ETH)
@@ -24,14 +25,15 @@ library OrderStructs {
      * @param price Minimum price for maker ask, maximum price for maker bid
      * @param itemIds Array of itemIds
      * @param amounts Array of amounts
-     * @param additionalParameters Extra data specific for the order
+     // param additionalParameters Extra data specific for the order
      */
     struct Maker {
         OrderType orderType;
+        bool isFulfilled;
         uint256 globalNonce;
         uint256 subsetNonce;
         uint256 orderNonce;
-        uint256 strategyId;
+        // uint256 strategyId;
         CollectionType collectionType;
         address collection;
         address currency;
@@ -41,17 +43,6 @@ library OrderStructs {
         uint256 price;
         uint256[] itemIds;
         uint256[] amounts;
-        bytes additionalParameters;
+        // bytes additionalParameters;
     }
 }
-
-//  struct Order {
-//       uint256 id;
-//       address trader; // Address of the trader who created the order
-//       OrderType orderType;
-//       address baseToken;
-//       address quoteToken;
-//       uint256 price;
-//       uint256 quantity;
-//       bool isFilled;
-//   }

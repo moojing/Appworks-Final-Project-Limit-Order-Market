@@ -16,7 +16,7 @@ How to Sign and Verify
 3. Compare recovered signer to claimed signer
 */
 
-contract VerifySignature {
+library OrderSignature {
     /* 1. Unlock MetaMask account
     ethereum.enable()
     */
@@ -32,17 +32,16 @@ contract VerifySignature {
     hash = "0xcf36ac4f97dc10d91fc2cbb20d718e94a8cbfe0f82eaedc6a4aa38946fb797cd"
     */
     function getMessageHash(
-        OrderStructs.Maker memory order,
-        uint _nonce
+        OrderStructs.Maker memory order
     ) public pure returns (bytes32) {
         return
             keccak256(
                 abi.encodePacked(
                     order.orderType,
+                    order.isFulfilled,
                     order.globalNonce,
                     order.subsetNonce,
                     order.orderNonce,
-                    order.strategyId,
                     order.collectionType,
                     order.collection,
                     order.currency,
@@ -51,9 +50,7 @@ contract VerifySignature {
                     order.endTime,
                     order.price,
                     order.itemIds,
-                    order.amounts,
-                    order.additionalParameters,
-                    _nonce
+                    order.amounts
                 )
             );
     }
@@ -96,11 +93,10 @@ contract VerifySignature {
     */
     function verify(
         OrderStructs.Maker memory order,
-        uint _nonce,
         address _signer,
         bytes memory signature
     ) public pure returns (bool) {
-        bytes32 messageHash = getMessageHash(order, _nonce);
+        bytes32 messageHash = getMessageHash(order);
         bytes32 ethSignedMessageHash = getEthSignedMessageHash(messageHash);
 
         return recoverSigner(ethSignedMessageHash, signature) == _signer;
