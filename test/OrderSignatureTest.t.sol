@@ -3,15 +3,22 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import "forge-std/console.sol";
-import {OrderSignature} from "../src/lib/OrderSignature.sol";
+import {OrderVerifier} from "../src/lib/OrderVerifier.sol";
+import {Orderbook} from "../src/Orderbook.sol";
 import {OrderStructs} from "../src/lib/OrderStructs.sol";
 import {CollectionType} from "../src/enums/CollectionType.sol";
 import {OrderType} from "../src/enums/OrderType.sol";
 
 contract OrderSignatureTest is Test {
+    using OrderVerifier for OrderStructs.Maker;
+
     OrderStructs.Maker makerOrder;
 
+    // Orderbook orderbook;
+
     function setUp() public {
+        // Orderbook orderbook = new Orderbook();
+        // create a maker order
         uint256[] memory itemIds = new uint256[](3);
         itemIds[0] = 1;
         itemIds[1] = 2;
@@ -39,30 +46,8 @@ contract OrderSignatureTest is Test {
     }
 
     function testMessageHash() public {
-        bytes32 message = OrderSignature.getMessageHash(makerOrder);
-        assertEq(
-            message,
-            0x98497dd969d0f78b12c01d1f88d1a194fe415c405c5e9b904adfb5cb3f4760e7
-        );
-        bytes32 ethSignedMessageHash = OrderSignature.getEthSignedMessageHash(
-            message
-        );
-
-        assertEq(
-            ethSignedMessageHash,
-            0xd4d6a7b74e4ba6f989db9706fe72e9dd67917d5090cd1d21fd846fd148f8926d
-        );
-        console.logBytes32(ethSignedMessageHash);
-        // bytes
-        // memory sig = 0xc23a9f49f0ee334403d4f4cd83c35e0a9372018a60eeb60d0321cb7339cd25df7121bbdf4597eb39efaf3e55ef9de6458a38cfd89deaa337aa022be12ce0443b1b;
-        bytes
-            memory sig = hex"c23a9f49f0ee334403d4f4cd83c35e0a9372018a60eeb60d0321cb7339cd25df7121bbdf4597eb39efaf3e55ef9de6458a38cfd89deaa337aa022be12ce0443b1b";
-
-        address signer = OrderSignature.recoverSigner(
-            0xd4d6a7b74e4ba6f989db9706fe72e9dd67917d5090cd1d21fd846fd148f8926d,
-            sig
-        );
-
-        console.log("addr", signer);
+        // bytes32 message = orderbook.hashStruct(makerOrder);
+        console.log('HASH:');
+        console.logBytes32(makerOrder.hash());
     }
 }
