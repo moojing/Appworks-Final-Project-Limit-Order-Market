@@ -11,12 +11,13 @@ import {OrderType} from "../src/enums/OrderType.sol";
 
 contract OrderSignatureTest is Test {
     using OrderVerifier for OrderStructs.Maker;
-
+    Orderbook testOrderBook;
     OrderStructs.Maker makerOrder;
 
     // Orderbook orderbook;
 
     function setUp() public {
+        vm.chainId(11155111);
         // Orderbook orderbook = new Orderbook();
         // create a maker order
         uint256[] memory itemIds = new uint256[](3);
@@ -43,11 +44,20 @@ contract OrderSignatureTest is Test {
             itemIds: itemIds,
             amounts: amounts
         });
+
+        testOrderBook = new Orderbook();
     }
 
     function testMessageHash() public {
-        // bytes32 message = orderbook.hashStruct(makerOrder);
-        console.log('HASH:');
+        console.log("HASH:");
         console.logBytes32(makerOrder.hash());
+
+        bool result = testOrderBook._computeDigestAndVerify(
+            makerOrder.hash(),
+            hex"442b01ae7425bf2fa0c26ee1f060be277bf6144e0b7ce8f1d110eaac9ad8cdc76c515ce874f41b6c09f1cca83384d0b5cd9f912c7a4e0973dc98389c6cc98e801b",
+            0x8865d9736Ad52c6cdBbEA9bCd376108284CFd0e4
+        );
+
+        assertEq(result, true, "signature should be valid");
     }
 }

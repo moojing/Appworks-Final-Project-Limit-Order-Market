@@ -4,33 +4,30 @@ import "forge-std/console.sol";
 import {OrderStructs} from "./OrderStructs.sol";
 
 library OrderVerifier {
-    bytes32 constant EIP712DOMAIN_TYPEHASH =
-        keccak256(
-            "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-        );
-
     /**
      * @notice This is the type hash constant used to compute the maker order hash.
      */
+
     bytes32 internal constant _MAKER_TYPEHASH =
         keccak256(
-            "Maker("
-            "uint8 quoteType,"
-            "uint256 globalNonce,"
-            "uint256 subsetNonce,"
-            "uint256 orderNonce,"
-            "uint256 strategyId,"
-            "uint8 collectionType,"
-            "address collection,"
-            "address currency,"
-            "address signer,"
-            "uint256 startTime,"
-            "uint256 endTime,"
-            "uint256 price,"
-            "uint256[] itemIds,"
-            "uint256[] amounts,"
-            "bytes additionalParameters"
-            ")"
+            abi.encodePacked(
+                "Maker("
+                "uint8 orderType,"
+                "bool isFulfilled,"
+                "uint256 globalNonce,"
+                "uint256 subsetNonce,"
+                "uint256 orderNonce,"
+                "uint8 collectionType,"
+                "address collection,"
+                "address currency,"
+                "address signer,"
+                "uint256 startTime,"
+                "uint256 endTime,"
+                "uint256 price,"
+                "uint256[] itemIds,"
+                "uint256[] amounts"
+                ")"
+            )
         );
 
     /**
@@ -40,8 +37,7 @@ library OrderVerifier {
      */
     function hash(
         OrderStructs.Maker memory maker
-    ) internal pure returns (bytes32) {
-        // Encoding is done into two parts to avoid stack too deep issues
+    ) internal view returns (bytes32) {
         return
             keccak256(
                 bytes.concat(
@@ -89,9 +85,8 @@ library OrderVerifier {
         bytes32 orderHash,
         address signer,
         bytes calldata signature
-    ) public view returns (bool) {
+    ) internal view returns (bool) {
         (uint8 v, bytes32 r, bytes32 s) = splitSignature(signature);
-
         return ecrecover(orderHash, v, r, s) == signer;
     }
 }

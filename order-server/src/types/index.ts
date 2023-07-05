@@ -22,7 +22,7 @@ export type Maker = {
   signer: string;
   startTime: number;
   endTime: number;
-  price: BN;
+  price: BN | number;
   itemIds: number[];
   amounts: number[];
 };

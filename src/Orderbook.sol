@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
+import "forge-std/console.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {OrderVerifier} from "./lib/OrderVerifier.sol";
+import "./lib/OrderVerifier.sol";
 import {OrderStructs} from "./lib/OrderStructs.sol";
 
 // for testing
@@ -40,17 +41,22 @@ contract Orderbook {
     error ChainIdInvalid(uint256 chainId);
 
     uint immutable chainId;
+    string constant EIP712_DOMAIN_TYPE =
+        "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)";
 
+    // hash to prevent signature collision
     bytes32 immutable DOMAIN_SEPARATOR =
         keccak256(
             abi.encode(
-                OrderVerifier.EIP712DOMAIN_TYPEHASH,
-                keccak256("Orderbook-v1"),
-                keccak256(bytes("1")),
+                keccak256(abi.encodePacked(EIP712_DOMAIN_TYPE)),
+                keccak256(bytes("Orderbook-v1")),
+                keccak256(bytes("4")),
                 block.chainid,
-                address(this)
+                // @todo: change this to the real contract, and change for testing
+                0x8865d9736Ad52c6cdBbEA9bCd376108284CFd0e4 // verifyingContract
             )
         );
+
     uint256 immutable CHAIN_ID = block.chainid;
 
     constructor() {
@@ -62,6 +68,12 @@ contract Orderbook {
         // makerOrder.isFilled = true;
     }
 
+    function orderHash(
+        OrderStructs.Maker memory makerOrder
+    ) public view returns (bytes32) {
+        return makerOrder.hash();
+    }
+
     /**
      * @notice This function is private and used to verify the chain id, compute the digest, and verify the signature.
      * @dev If chainId is not equal to the cached chain id, it would revert.
@@ -69,23 +81,26 @@ contract Orderbook {
      * @param makerSignature Signature of the maker
      * @param signer Signer address
      */
+    // @todo : change this to internal
     function _computeDigestAndVerify(
         bytes32 computedHash,
         bytes calldata makerSignature,
         address signer
-    ) private view {
+    ) public returns (bool) {
         if (chainId == block.chainid) {
-            //       bytes32 digest = keccak256(
-            //     abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, hashStruct(maker))
-            // );
             // \x19\x01 is the standard encoding prefix
-            OrderVerifier.verify(
-                keccak256(
-                    abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, computedHash)
-                ),
-                signer,
-                makerSignature
-            );
+            return
+                OrderVerifier.verify(
+                    keccak256(
+                        abi.encodePacked(
+                            "\x19\x01",
+                            DOMAIN_SEPARATOR,
+                            computedHash
+                        )
+                    ),
+                    signer,
+                    makerSignature
+                );
         } else {
             revert ChainIdInvalid(block.chainid);
         }

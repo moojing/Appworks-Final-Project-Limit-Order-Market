@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@metamask/eth-sig-util": "^6.0.0",
     "@types/bn.js": "^5.1.1",
     "@types/node": "20.3.2",
     "@types/react": "18.2.14",
