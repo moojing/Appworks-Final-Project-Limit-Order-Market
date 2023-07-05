@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from 'react';
-
-
 import { SignTypedDataVersion, TypedDataUtils, TypedMessage } from "@metamask/eth-sig-util";
-import '../utils/signature';
 
 
 
