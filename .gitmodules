@@ -7,3 +7,6 @@
 [submodule "lib/contracts-libs"]
 	path = lib/contracts-libs
 	url = https://github.com/Looksrare/contracts-libs
+[submodule "lib/@looksrare/contracts-libs"]
+	path = lib/@looksrare/contracts-libs
+	url = https://github.com/Looksrare/contracts-libs
