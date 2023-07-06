@@ -45,4 +45,9 @@ library OrderStructs {
         uint256[] amounts;
         // bytes additionalParameters;
     }
+
+    struct Taker {
+        address recipient;
+        // bytes additionalParameters;
+    }
 }

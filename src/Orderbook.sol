@@ -63,15 +63,16 @@ contract Orderbook {
         chainId = block.chainid;
     }
 
-    function fulfillOrder(OrderStructs.Maker memory makerOrder) internal {
+    function fulfillMakerOrder(
+        OrderStructs.Taker calldata takerAsk,
+        OrderStructs.Maker memory makerOrder,
+        bytes calldata makerSignature,
+        ) internal {
         // @todo the flow of fulfilling an order
-        // makerOrder.isFilled = true;
-    }
+        // check the currency in the order 
+        address currency = makerAsk.currency;
 
-    function orderHash(
-        OrderStructs.Maker memory makerOrder
-    ) public view returns (bytes32) {
-        return makerOrder.hash();
+        // makerOrder.isFilled = true;
     }
 
     /**
