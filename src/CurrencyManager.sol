@@ -1,4 +1,8 @@
-contract CurrencyManager {
+// SPDX License Identifier: MIT
+import {OwnableTwoSteps} from "@looksrare/contracts/OwnableTwoSteps.sol";
+import {ICurrencyManager} from "./interfaces/ICurrencyManager.sol";
+
+contract CurrencyManager is ICurrencyManager {
     /**
      * @notice It checks whether the currency is allowed for transacting.
      */
@@ -20,6 +24,6 @@ contract CurrencyManager {
     // @todo only owner
     function updateCurrencyStatus(address currency, bool isAllowed) external {
         isCurrencyAllowed[currency] = isAllowed;
-        // emit CurrencyStatusUpdated(currency, isAllowed);
+        emit CurrencyStatusUpdated(currency, isAllowed);
     }
 }
