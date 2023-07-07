@@ -45,7 +45,7 @@ contract Orderbook {
         "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)";
 
     // hash to prevent signature collision
-    bytes32 immutable DOMAIN_SEPARATOR =
+    bytes32 public immutable DOMAIN_SEPARATOR =
         keccak256(
             abi.encode(
                 keccak256(abi.encodePacked(EIP712_DOMAIN_TYPE)),
@@ -66,11 +66,11 @@ contract Orderbook {
     function fulfillMakerOrder(
         OrderStructs.Taker calldata takerAsk,
         OrderStructs.Maker memory makerOrder,
-        bytes calldata makerSignature,
-        ) internal {
+        bytes calldata makerSignature
+    ) internal {
         // @todo the flow of fulfilling an order
-        // check the currency in the order 
-        address currency = makerAsk.currency;
+        // check the currency in the order
+        address currency = makerOrder.currency;
 
         // makerOrder.isFilled = true;
     }

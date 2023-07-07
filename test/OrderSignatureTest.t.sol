@@ -14,6 +14,9 @@ contract OrderSignatureTest is Test {
     Orderbook testOrderBook;
     OrderStructs.Maker makerOrder;
 
+    address alice;
+    uint256 alicePrivateKey;
+
     // Orderbook orderbook;
 
     function setUp() public {
@@ -46,16 +49,54 @@ contract OrderSignatureTest is Test {
         });
 
         testOrderBook = new Orderbook();
+        string
+            memory mnemonic = "test test test test test test test test test test test junk";
+        alicePrivateKey = vm.deriveKey(mnemonic, 0);
+        alice = vm.addr(alicePrivateKey);
     }
 
-    function testMessageHash() public {
-        console.log("HASH:");
-        console.logBytes32(makerOrder.hash());
+    // from seaport
+    function getSignatureComponents(
+        // ConsiderationInterface _consideration,
+        uint256 _pkOfSigner,
+        bytes32 _orderHash
+    ) internal view returns (bytes32, bytes32, uint8) {
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+            _pkOfSigner,
+            keccak256(
+                abi.encodePacked(
+                    bytes2(0x1901),
+                    testOrderBook.DOMAIN_SEPARATOR(),
+                    _orderHash
+                )
+            )
+        );
+        return (r, s, v);
+    }
 
+    function signOrder(
+        uint256 _pkOfSigner,
+        bytes32 _orderHash
+    ) internal view returns (bytes memory) {
+        (bytes32 r, bytes32 s, uint8 v) = getSignatureComponents(
+            _pkOfSigner,
+            _orderHash
+        );
+        return abi.encodePacked(r, s, v);
+    }
+
+    function testSignOrder() public {
+        bytes memory signature = signOrder(alicePrivateKey, makerOrder.hash());
+        // console.log("HASH:");
+        // console.logBytes32(makerOrder.hash());
+        // console.log("ALICE");
+        // console.logAddress(alice);
+        // console.log("SIGNATURE");
+        // console.logBytes(signature);
         bool result = testOrderBook._computeDigestAndVerify(
             makerOrder.hash(),
-            hex"442b01ae7425bf2fa0c26ee1f060be277bf6144e0b7ce8f1d110eaac9ad8cdc76c515ce874f41b6c09f1cca83384d0b5cd9f912c7a4e0973dc98389c6cc98e801b",
-            0x8865d9736Ad52c6cdBbEA9bCd376108284CFd0e4
+            signature,
+            alice
         );
 
         assertEq(result, true, "signature should be valid");
