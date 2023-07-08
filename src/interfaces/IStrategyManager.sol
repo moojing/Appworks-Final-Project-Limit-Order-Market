@@ -3,7 +3,6 @@ pragma solidity 0.8.19;
 
 /**
  * @title IStrategyManager
- * @author LooksRare protocol team (👀,💎)
  */
 interface IStrategyManager {
     /**

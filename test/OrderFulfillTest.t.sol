@@ -132,7 +132,11 @@ contract OrderFulfillTestTest is Test {
             makerOrder.hash()
         );
 
-        testOrderBook.fulfillMakerOrder(takerOrder, makerOrder, makerSignature);
+        testOrderBook.fulfillMakerOrderBid(
+            takerOrder,
+            makerOrder,
+            makerSignature
+        );
         console.logBytes32(
             testOrderBook.userOrderNonce(alice, makerOrder.orderNonce)
         );

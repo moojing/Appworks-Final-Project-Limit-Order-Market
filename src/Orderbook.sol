@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./NonceManager.sol";
 import "./lib/OrderVerifier.sol";
 import {OrderStructs} from "./lib/OrderStructs.sol";
+import {OrderType} from "./enums/OrderType.sol";
 import {StrategyManager} from "./StrategyManager.sol";
 import {ChainIdInvalid, NoncesInvalid} from "./errors/GlobalErrors.sol";
 
@@ -34,7 +35,7 @@ contract Orderbook is NonceManager, StrategyManager {
         chainId = block.chainid;
     }
 
-    function fulfillMakerOrder(
+    function fulfillMakerOrderBid(
         OrderStructs.Taker calldata takerOrder,
         OrderStructs.Maker calldata makerOrder,
         bytes calldata makerSignature
@@ -72,10 +73,57 @@ contract Orderbook is NonceManager, StrategyManager {
             }
         }
 
+        // _executeStrategyForTakerOrder(takerOrder, makerOrder, msg.sender);
+
         // @todo Update the nonce of order maker/signer
         // userOrderNonce[signer][orderNonce] = (
         //     isNonceInvalidated ? MAGIC_VALUE_ORDER_NONCE_EXECUTED : orderHash
         // );
+    }
+
+    function _executeStrategyForTakerOrder(
+        OrderStructs.Taker calldata takerOrder,
+        OrderStructs.Maker calldata makerOrder,
+        address sender
+    )
+        internal
+        returns (
+            uint256[] memory itemIds,
+            uint256[] memory amounts,
+            address recipient,
+            bool isNonceInvalidated
+        )
+    {
+        uint256 price;
+
+        // Verify Order timestamp
+        makerOrder._verifyOrderTimestampValidity(
+            makerOrder.startTime,
+            makerOrder.endTime
+        );
+
+        // If it's a normal transaction
+        if (makerOrder.strategyId == 0) {
+            makerOrder._verifyItemIdsAndAmountsEqualLengthsAndValidAmounts(
+                makerOrder.amounts,
+                makerOrder.itemIds
+            );
+            (price, itemIds, amounts) = (
+                makerOrder.price,
+                makerOrder.itemIds,
+                makerOrder.amounts
+            );
+            isNonceInvalidated = true;
+        }
+        // @todo set information for strategies
+        if (makerOrder.orderType == OrderType.Bid) {
+            recipient = takerOrder.recipient == address(0)
+                ? sender
+                : takerOrder.recipient;
+        } else {
+            // makerOrder.orderType == OrderType.Ask
+            recipient = makerOrder.signer;
+        }
     }
 
     /**

@@ -14,7 +14,7 @@ library OrderStructs {
      * @param globalNonce Global user order nonce for maker orders
      * @param subsetNonce Subset nonce (shared across bid/ask maker orders)
      * @param orderNonce Order nonce (it can be shared across bid/ask maker orders)
-     // param strategyId Strategy id
+     * @param strategyId Strategy id
      * @param collectionType Collection type (i.e. 0 = ERC721, 1 = ERC1155)
      * @param collection Collection address
      * @param currency Currency address (@dev address(0) = ETH)
@@ -31,7 +31,7 @@ library OrderStructs {
         uint256 globalNonce;
         uint256 subsetNonce;
         uint256 orderNonce;
-        // uint256 strategyId;
+        uint256 strategyId;
         CollectionType collectionType;
         address collection;
         address currency;
@@ -46,6 +46,6 @@ library OrderStructs {
 
     struct Taker {
         address recipient;
-        // bytes additionalParameters;
+        bytes additionalParameters;
     }
 }
