@@ -3,35 +3,11 @@ pragma solidity ^0.8.13;
 import "forge-std/console.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "./NonceManager.sol";
 import "./lib/OrderVerifier.sol";
 import {OrderStructs} from "./lib/OrderStructs.sol";
 
-// for testing
-// contract Token1 is ERC20 {
-//     // Constructor function that initializes the ERC20 token with a custom name, symbol, and initial supply
-//     // The name, symbol, and initial supply are passed as arguments to the constructor
-//     constructor(
-//         string memory name,
-//         string memory symbol,
-//         uint256 initialSupply
-//     ) ERC20(name, symbol) {
-//         // Mint the initial supply of tokens to the deployer's address
-//         _mint(msg.sender, initialSupply);
-//     }
-// }
-
-// contract Token2 is ERC20 {
-//     constructor(
-//         string memory name,
-//         string memory symbol,
-//         uint256 initialSupply
-//     ) ERC20(name, symbol) {
-//         // Mint the initial supply of tokens to the deployer's address
-//         _mint(msg.sender, initialSupply);
-//     }
-// }
-
-contract Orderbook {
+contract Orderbook is NonceManager {
     using OrderVerifier for OrderStructs.Maker;
 
     // Order[] public bidOrders;
@@ -64,15 +40,22 @@ contract Orderbook {
     }
 
     function fulfillMakerOrder(
-        OrderStructs.Taker calldata takerAsk,
-        OrderStructs.Maker memory makerOrder,
+        OrderStructs.Taker calldata takerOrder,
+        OrderStructs.Maker calldata makerOrder,
         bytes calldata makerSignature
-    ) internal {
+    ) public {
         // @todo the flow of fulfilling an order
         // check the currency in the order
         address currency = makerOrder.currency;
+        console.log("currency", currency);
 
-        // makerOrder.isFilled = true;
+        bool result = _computeDigestAndVerify(
+            makerOrder.hash(),
+            makerSignature,
+            makerOrder.signer
+        );
+
+        require(result, "Signature of the order is invalid");
     }
 
     /**

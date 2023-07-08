@@ -12,7 +12,6 @@ enum CollectionType {
 
 export type Maker = {
   orderType: OrderType;
-  isFulfilled: boolean;
   globalNonce: number;
   subsetNonce: number;
   orderNonce: number;

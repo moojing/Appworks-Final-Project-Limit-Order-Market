@@ -1,5 +1,5 @@
 import "forge-std/Script.sol";
-import {Orderbook} from "../Orderbook.sol";
+import {Orderbook} from "../src/Orderbook.sol";
 
 contract MyScript is Script {
     function run() public {

@@ -13,7 +13,6 @@ library OrderVerifier {
             abi.encodePacked(
                 "Maker("
                 "uint8 orderType,"
-                "bool isFulfilled,"
                 "uint256 globalNonce,"
                 "uint256 subsetNonce,"
                 "uint256 orderNonce,"
@@ -44,7 +43,6 @@ library OrderVerifier {
                     abi.encode(
                         _MAKER_TYPEHASH,
                         maker.orderType,
-                        maker.isFulfilled,
                         maker.globalNonce,
                         maker.subsetNonce,
                         maker.orderNonce,

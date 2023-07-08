@@ -10,7 +10,6 @@ const Index = () => {
 
   const order = {
     orderType: 1,  // Ask
-    isFulfilled: false,
     globalNonce: 1,
     subsetNonce: 2,
     orderNonce: 3,
@@ -33,7 +32,6 @@ const Index = () => {
   ],
   Maker: [
     { name: "orderType", type: "uint8" },
-    { name: "isFulfilled", type: "bool" },
     { name: "globalNonce", type: "uint256" },
     { name: "subsetNonce", type: "uint256" },
     { name: "orderNonce", type: "uint256" },

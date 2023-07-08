@@ -11,7 +11,6 @@ library OrderStructs {
     /**
      * @notice Maker is the struct for a maker order.
      * @param orderType Order type (i.e. 0 = BID, 1 = ASK)
-     * @param isFulfilled Whether the order has been fulfilled
      * @param globalNonce Global user order nonce for maker orders
      * @param subsetNonce Subset nonce (shared across bid/ask maker orders)
      * @param orderNonce Order nonce (it can be shared across bid/ask maker orders)
@@ -29,7 +28,6 @@ library OrderStructs {
      */
     struct Maker {
         OrderType orderType;
-        bool isFulfilled;
         uint256 globalNonce;
         uint256 subsetNonce;
         uint256 orderNonce;

@@ -9,13 +9,32 @@ import {OrderStructs} from "../src/lib/OrderStructs.sol";
 import {CollectionType} from "../src/enums/CollectionType.sol";
 import {OrderType} from "../src/enums/OrderType.sol";
 
-contract OrderSignatureTest is Test {
+// for testing
+// contract Token1 is ERC20 {
+//     // Constructor function that initializes the ERC20 token with a custom name, symbol, and initial supply
+//     // The name, symbol, and initial supply are passed as arguments to the constructor
+//     constructor(
+//         string memory name,
+//         string memory symbol,
+//         uint256 initialSupply
+//     ) ERC20(name, symbol) {
+//         // Mint the initial supply of tokens to the deployer's address
+//         _mint(msg.sender, initialSupply);
+//     }
+// }
+
+contract OrderFulfillTestTest is Test {
     using OrderVerifier for OrderStructs.Maker;
     Orderbook testOrderBook;
     OrderStructs.Maker makerOrder;
 
     address alice;
     uint256 alicePrivateKey;
+    address bob;
+    uint256 bobPrivateKey;
+
+    bytes32 public constant MAGIC_VALUE_ORDER_NONCE_EXECUTED =
+        keccak256("ORDER_NONCE_EXECUTED");
 
     // Orderbook orderbook;
 
@@ -31,9 +50,9 @@ contract OrderSignatureTest is Test {
         amounts[0] = 1;
         amounts[1] = 1;
         amounts[2] = 1;
+
         makerOrder = OrderStructs.Maker({
             orderType: OrderType.Ask,
-            isFulfilled: false,
             globalNonce: 1,
             subsetNonce: 2,
             orderNonce: 3,
@@ -53,6 +72,8 @@ contract OrderSignatureTest is Test {
             memory mnemonic = "test test test test test test test test test test test junk";
         alicePrivateKey = vm.deriveKey(mnemonic, 0);
         alice = vm.addr(alicePrivateKey);
+        bob = vm.addr(vm.deriveKey(mnemonic, 1));
+        bobPrivateKey = vm.deriveKey(mnemonic, 1);
     }
 
     // from seaport
@@ -100,5 +121,25 @@ contract OrderSignatureTest is Test {
         );
 
         assertEq(result, true, "signature should be valid");
+    }
+
+    function testFufillOrder() public {
+        OrderStructs.Taker memory takerOrder = OrderStructs.Taker({
+            recipient: bob
+        });
+        bytes memory makerSignature = signOrder(
+            alicePrivateKey,
+            makerOrder.hash()
+        );
+
+        testOrderBook.fulfillMakerOrder(takerOrder, makerOrder, makerSignature);
+        console.logBytes32(
+            testOrderBook.userOrderNonce(alice, makerOrder.orderNonce)
+        );
+        assertEq(
+            testOrderBook.userOrderNonce(alice, makerOrder.orderNonce),
+            MAGIC_VALUE_ORDER_NONCE_EXECUTED,
+            "maker order should be fulfilled"
+        );
     }
 }
