@@ -61,7 +61,7 @@ contract Orderbook is NonceManager, StrategyManager {
             ];
 
             if (
-                // @todo : add the checking back
+                // @todo : add the checking about the nonce of the subset
                 // userBidAskNonces[signer].askNonce != makerAsk.globalNonce ||
                 // userSubsetNonce[signer][makerAsk.subsetNonce] ||
 
@@ -73,12 +73,17 @@ contract Orderbook is NonceManager, StrategyManager {
             }
         }
 
-        // _executeStrategyForTakerOrder(takerOrder, makerOrder, msg.sender);
+        (
+            uint256[] memory itemIds,
+            uint256[] memory amounts,
+            address recipient,
+            bool isNonceInvalidated
+        ) = _executeStrategyForTakerOrder(takerOrder, makerOrder, msg.sender);
 
-        // @todo Update the nonce of order maker/signer
-        // userOrderNonce[signer][orderNonce] = (
-        //     isNonceInvalidated ? MAGIC_VALUE_ORDER_NONCE_EXECUTED : orderHash
-        // );
+        // Update the nonce of order maker/signer
+        userOrderNonce[signer][makerOrder.orderNonce] = (
+            isNonceInvalidated ? MAGIC_VALUE_ORDER_NONCE_EXECUTED : orderHash
+        );
     }
 
     function _executeStrategyForTakerOrder(

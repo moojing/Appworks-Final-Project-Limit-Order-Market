@@ -48,20 +48,18 @@ contract OrderFulfillTestTest is Test {
         deal(USDC, bob, initialBalance);
 
         // create a maker order
-        uint256[] memory itemIds = new uint256[](3);
-        // itemIds[0] = 1;
-        // itemIds[1] = 2;
-        // itemIds[2] = 3;
-        uint256[] memory amounts = new uint256[](3);
-        // amounts[0] = 1;
-        // amounts[1] = 1;
-        // amounts[2] = 1;
+        uint256[] memory itemIds = new uint256[](1);
+        itemIds[0] = 1;
+
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 1;
 
         makerOrder = OrderStructs.Maker({
             orderType: OrderType.Ask,
             globalNonce: 1,
             subsetNonce: 1,
             orderNonce: 1,
+            strategyId: 0,
             collectionType: CollectionType.ERC721,
             collection: ONCHAIN_MONKEY,
             currency: USDC,
@@ -125,7 +123,8 @@ contract OrderFulfillTestTest is Test {
 
     function testFufillOrder() public {
         OrderStructs.Taker memory takerOrder = OrderStructs.Taker({
-            recipient: bob
+            recipient: bob,
+            additionalParameters: "0x0"
         });
         bytes memory makerSignature = signOrder(
             alicePrivateKey,
@@ -140,6 +139,7 @@ contract OrderFulfillTestTest is Test {
         console.logBytes32(
             testOrderBook.userOrderNonce(alice, makerOrder.orderNonce)
         );
+
         assertEq(
             testOrderBook.userOrderNonce(alice, makerOrder.orderNonce),
             MAGIC_VALUE_ORDER_NONCE_EXECUTED,
