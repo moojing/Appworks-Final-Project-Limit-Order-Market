@@ -6,15 +6,10 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./NonceManager.sol";
 import "./lib/OrderVerifier.sol";
 import {OrderStructs} from "./lib/OrderStructs.sol";
+import {ChainIdInvalid, NoncesInvalid} from "./errors/GlobalErrors.sol";
 
 contract Orderbook is NonceManager {
     using OrderVerifier for OrderStructs.Maker;
-
-    // Order[] public bidOrders;
-    // Order[] public askOrders;
-
-    // errors
-    error ChainIdInvalid(uint256 chainId);
 
     uint immutable chainId;
     string constant EIP712_DOMAIN_TYPE =
@@ -28,8 +23,7 @@ contract Orderbook is NonceManager {
                 keccak256(bytes("Orderbook-v1")),
                 keccak256(bytes("4")),
                 block.chainid,
-                // @todo: change this to the real contract, and change for testing
-                0x8865d9736Ad52c6cdBbEA9bCd376108284CFd0e4 // verifyingContract
+                address(this) // verifyingContract
             )
         );
 
@@ -45,6 +39,7 @@ contract Orderbook is NonceManager {
         bytes calldata makerSignature
     ) public {
         // @todo the flow of fulfilling an order
+        bytes32 orderHash = makerOrder.hash();
         // check the currency in the order
         address currency = makerOrder.currency;
         console.log("currency", currency);
@@ -56,6 +51,31 @@ contract Orderbook is NonceManager {
         );
 
         require(result, "Signature of the order is invalid");
+
+        // Verify nonces
+        address signer = makerOrder.signer;
+        {
+            bytes32 userOrderNonceStatus = userOrderNonce[signer][
+                makerOrder.orderNonce
+            ];
+
+            if (
+                // @todo : add the checking back
+                // userBidAskNonces[signer].askNonce != makerAsk.globalNonce ||
+                // userSubsetNonce[signer][makerAsk.subsetNonce] ||
+
+                // if the userOrderNonceStatus is not 0, it means that the order has been fulfilled or cancelled
+                (userOrderNonceStatus != bytes32(0) &&
+                    userOrderNonceStatus != orderHash)
+            ) {
+                revert NoncesInvalid();
+            }
+        }
+
+        // Update the nonce of order maker/signer
+        // userOrderNonce[signer][orderNonce] = (
+        //     isNonceInvalidated ? MAGIC_VALUE_ORDER_NONCE_EXECUTED : orderHash
+        // );
     }
 
     /**
