@@ -6,9 +6,10 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./NonceManager.sol";
 import "./lib/OrderVerifier.sol";
 import {OrderStructs} from "./lib/OrderStructs.sol";
+import {StrategyManager} from "./StrategyManager.sol";
 import {ChainIdInvalid, NoncesInvalid} from "./errors/GlobalErrors.sol";
 
-contract Orderbook is NonceManager {
+contract Orderbook is NonceManager, StrategyManager {
     using OrderVerifier for OrderStructs.Maker;
 
     uint immutable chainId;
@@ -29,7 +30,7 @@ contract Orderbook is NonceManager {
 
     uint256 immutable CHAIN_ID = block.chainid;
 
-    constructor() {
+    constructor() StrategyManager(msg.sender) {
         chainId = block.chainid;
     }
 
@@ -38,9 +39,8 @@ contract Orderbook is NonceManager {
         OrderStructs.Maker calldata makerOrder,
         bytes calldata makerSignature
     ) public {
-        // @todo the flow of fulfilling an order
         bytes32 orderHash = makerOrder.hash();
-        // check the currency in the order
+        //@todo check the currency in the order
         address currency = makerOrder.currency;
         console.log("currency", currency);
 
@@ -72,7 +72,7 @@ contract Orderbook is NonceManager {
             }
         }
 
-        // Update the nonce of order maker/signer
+        // @todo Update the nonce of order maker/signer
         // userOrderNonce[signer][orderNonce] = (
         //     isNonceInvalidated ? MAGIC_VALUE_ORDER_NONCE_EXECUTED : orderHash
         // );

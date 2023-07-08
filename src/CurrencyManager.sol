@@ -2,7 +2,7 @@
 import {OwnableTwoSteps} from "@looksrare/contracts/OwnableTwoSteps.sol";
 import {ICurrencyManager} from "./interfaces/ICurrencyManager.sol";
 
-contract CurrencyManager is ICurrencyManager {
+contract CurrencyManager is ICurrencyManager, OwnableTwoSteps {
     /**
      * @notice It checks whether the currency is allowed for transacting.
      */
@@ -12,7 +12,7 @@ contract CurrencyManager is ICurrencyManager {
      * @notice Constructor
      * @param _owner Owner address
      */
-    constructor(address _owner) {}
+    constructor(address _owner) OwnableTwoSteps(_owner) {}
 
     /**
      * @notice This function allows the owner to update the status of a currency.
