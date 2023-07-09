@@ -82,6 +82,7 @@ contract Orderbook is NonceManager, StrategyManager, TransferManager {
         ) = _executionForTakerOrder(takerOrder, makerOrder, msg.sender);
 
         _executeTransferNFT(msg.sender, makerOrder, itemIds, amounts);
+        _executeTransferERC20(msg.sender, makerOrder);
 
         // Update the nonce of order maker/signer
         userOrderNonce[signer][makerOrder.orderNonce] = (
@@ -138,6 +139,14 @@ contract Orderbook is NonceManager, StrategyManager, TransferManager {
         }
     }
 
+    /**
+     * @notice This function is internal and used to transfer NFTs.
+     * @dev the recipient and sender are decided by the order type.
+     * @param sender msg.sender
+     * @param makerOrder OrderStructs.Maker
+     * @param itemIds the item ids of the NFT to transfer
+     * @param amounts the amounts of the NFT to transfer
+     */
     function _executeTransferNFT(
         address sender,
         OrderStructs.Maker memory makerOrder,
@@ -162,6 +171,28 @@ contract Orderbook is NonceManager, StrategyManager, TransferManager {
                 amounts,
                 makerOrder.collectionType,
                 makerOrder.collection
+            );
+        }
+    }
+
+    function _executeTransferERC20(
+        address sender,
+        OrderStructs.Maker memory makerOrder
+    ) internal {
+        if (makerOrder.orderType == OrderType.Bid) {
+            transferOrderERC20(
+                makerOrder.signer,
+                sender,
+                makerOrder.price,
+                makerOrder.currency
+            );
+        } else {
+            // makerOrder.orderType == OrderType.Ask
+            transferOrderERC20(
+                sender,
+                makerOrder.signer,
+                makerOrder.price,
+                makerOrder.currency
             );
         }
     }

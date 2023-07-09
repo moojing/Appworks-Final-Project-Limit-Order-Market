@@ -17,6 +17,20 @@ interface ITransferManager {
     );
 
     /**
+     * @notice It is emitted when a ERC20 token is transferred.
+     * @param from From address
+     * @param to To address
+     * @param amount Token amount
+     * @param collectionAddress Contract address
+     */
+    event ERC20Transferred(
+        address from,
+        address to,
+        uint256 amount,
+        address collectionAddress
+    );
+
+    /**
      * @notice This function allows the owner to execute a transfer of an ERC721 token.
      * @param from From address
      * @param to To address

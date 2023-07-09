@@ -37,6 +37,13 @@ contract OrderFulfillTestTest is Test {
         address collectionAddress
     );
 
+    event ERC20Transferred(
+        address from,
+        address to,
+        uint256 amount,
+        address collectionAddress
+    );
+
     function setUp() public {
         string memory rpc = vm.envString("NET_RPC_URL");
         vm.createSelectFork(rpc);
@@ -72,10 +79,10 @@ contract OrderFulfillTestTest is Test {
             collectionType: CollectionType.ERC721,
             collection: ONCHAIN_MONKEY,
             currency: USDC,
+            price: 100 * 10 ** 6, // 100U
             signer: alice,
             startTime: 1672444800, //20230101
             endTime: 1703980800, // 20231231
-            price: 100 * 10 ** 6, //1 ETH
             itemIds: itemIds,
             amounts: amounts
         });
@@ -155,6 +162,11 @@ contract OrderFulfillTestTest is Test {
         vm.expectEmit(false, false, false, false);
         emit ERC721Transferred(alice, bob, 1, ONCHAIN_MONKEY);
 
+        vm.expectEmit(false, false, false, false);
+        emit ERC20Transferred(bob, alice, 100 * 10 ** 6, USDC);
+
+        // Bob approve the USDC allowance to the orderbook for purchasing
+        IERC20(USDC).approve(address(testOrderBook), 100 * 10 ** 6);
         testOrderBook.fulfillMakerOrderBid(
             takerOrder,
             makerOrder,
@@ -170,5 +182,7 @@ contract OrderFulfillTestTest is Test {
         );
 
         assertEq(IERC721(ONCHAIN_MONKEY).ownerOf(1), bob);
+        assertEq(IERC20(USDC).balanceOf(bob), 50_000 * 10 ** 6 - 100 * 10 ** 6);
+        assertEq(IERC20(USDC).balanceOf(alice), 100 * 10 ** 6);
     }
 }

@@ -2,6 +2,7 @@
 pragma solidity 0.8.19;
 import {OwnableTwoSteps} from "@looksrare/contracts/OwnableTwoSteps.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {ITransferManager} from "./interfaces/ITransferManager.sol";
 import {CurrencyManager} from "./CurrencyManager.sol";
@@ -37,6 +38,19 @@ contract TransferManager is ITransferManager, ReentrancyGuard {
             // @todo support erc 1155
             revert("Not supported");
         }
+    }
+
+    function transferOrderERC20(
+        address _from,
+        address _to,
+        uint _amount,
+        address _tokenAddress
+    ) internal {
+        uint256 balance = IERC20(_tokenAddress).balanceOf(_from);
+        require(balance >= _amount, "Not enough balance to transfer");
+
+        IERC20(_tokenAddress).transferFrom(_from, _to, _amount);
+        emit ERC20Transferred(_from, _to, _amount, _tokenAddress);
     }
 
     function executeTransferERC721(
