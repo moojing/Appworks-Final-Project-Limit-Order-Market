@@ -8,9 +8,10 @@ import "./lib/OrderVerifier.sol";
 import {OrderStructs} from "./lib/OrderStructs.sol";
 import {OrderType} from "./enums/OrderType.sol";
 import {StrategyManager} from "./StrategyManager.sol";
+import {TransferManager} from "./TransferManager.sol";
 import {ChainIdInvalid, NoncesInvalid} from "./errors/GlobalErrors.sol";
 
-contract Orderbook is NonceManager, StrategyManager {
+contract Orderbook is NonceManager, StrategyManager, TransferManager {
     using OrderVerifier for OrderStructs.Maker;
 
     uint immutable chainId;
@@ -31,7 +32,7 @@ contract Orderbook is NonceManager, StrategyManager {
 
     uint256 immutable CHAIN_ID = block.chainid;
 
-    constructor() StrategyManager(msg.sender) {
+    constructor() StrategyManager(msg.sender) TransferManager() {
         chainId = block.chainid;
     }
 
