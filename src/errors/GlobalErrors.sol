@@ -1,4 +1,10 @@
 /**
+ * @notice It is returned if the amount is invalid.
+ *         For ERC721, any number that is not 1. For ERC1155, if amount is 0.
+ */
+error AmountInvalid();
+
+/**
  * @notice It's returned if the chain id is invalid.
  */
 error ChainIdInvalid(uint256 chainId);

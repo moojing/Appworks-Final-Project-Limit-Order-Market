@@ -77,9 +77,11 @@ contract Orderbook is NonceManager, StrategyManager, TransferManager {
         (
             uint256[] memory itemIds,
             uint256[] memory amounts,
-            address recipient,
+            address takerRecipient,
             bool isNonceInvalidated
-        ) = _executeStrategyForTakerOrder(takerOrder, makerOrder, msg.sender);
+        ) = _executionForTakerOrder(takerOrder, makerOrder, msg.sender);
+
+        _executeTransferNFT(msg.sender, makerOrder, itemIds, amounts);
 
         // Update the nonce of order maker/signer
         userOrderNonce[signer][makerOrder.orderNonce] = (
@@ -87,7 +89,7 @@ contract Orderbook is NonceManager, StrategyManager, TransferManager {
         );
     }
 
-    function _executeStrategyForTakerOrder(
+    function _executionForTakerOrder(
         OrderStructs.Taker calldata takerOrder,
         OrderStructs.Maker calldata makerOrder,
         address sender
@@ -121,7 +123,11 @@ contract Orderbook is NonceManager, StrategyManager, TransferManager {
             );
             isNonceInvalidated = true;
         }
-        // @todo set information for strategies
+
+        // @todo set information for strategie/// @notice Explain to an end user what this does
+
+        // Bid --> token (or fee if any) recipient is the recipient in the taker order or `msg.sender`
+        // Ask --> token (or fee if any) recipient is the signer of the maker order
         if (makerOrder.orderType == OrderType.Bid) {
             recipient = takerOrder.recipient == address(0)
                 ? sender
@@ -129,6 +135,34 @@ contract Orderbook is NonceManager, StrategyManager, TransferManager {
         } else {
             // makerOrder.orderType == OrderType.Ask
             recipient = makerOrder.signer;
+        }
+    }
+
+    function _executeTransferNFT(
+        address sender,
+        OrderStructs.Maker memory makerOrder,
+        uint256[] memory itemIds,
+        uint256[] memory amounts
+    ) internal {
+        if (makerOrder.orderType == OrderType.Bid) {
+            transferOrderNFT(
+                sender,
+                makerOrder.signer,
+                itemIds,
+                amounts,
+                makerOrder.collectionType,
+                makerOrder.collection
+            );
+        } else {
+            // makerOrder.orderType == OrderType.Ask
+            transferOrderNFT(
+                makerOrder.signer,
+                sender,
+                itemIds,
+                amounts,
+                makerOrder.collectionType,
+                makerOrder.collection
+            );
         }
     }
 

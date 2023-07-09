@@ -12,6 +12,7 @@ import {Orderbook} from "../src/Orderbook.sol";
 import {OrderStructs} from "../src/lib/OrderStructs.sol";
 import {CollectionType} from "../src/enums/CollectionType.sol";
 import {OrderType} from "../src/enums/OrderType.sol";
+import {ITransferManager} from "../src/interfaces/ITransferManager.sol";
 
 address constant USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
 address constant ONCHAIN_MONKEY = 0x960b7a6BCD451c9968473f7bbFd9Be826EFd549A;
@@ -29,7 +30,12 @@ contract OrderFulfillTestTest is Test {
     bytes32 public constant MAGIC_VALUE_ORDER_NONCE_EXECUTED =
         keccak256("ORDER_NONCE_EXECUTED");
 
-    // Orderbook orderbook;
+    event ERC721Transferred(
+        address from,
+        address to,
+        uint256 tokenId,
+        address collectionAddress
+    );
 
     function setUp() public {
         string memory rpc = vm.envString("NET_RPC_URL");
@@ -42,6 +48,9 @@ contract OrderFulfillTestTest is Test {
         alice = vm.addr(alicePrivateKey);
         bob = vm.addr(vm.deriveKey(mnemonic, 1));
         bobPrivateKey = vm.deriveKey(mnemonic, 1);
+
+        vm.label(alice, "alice");
+        vm.label(bob, "bob");
 
         uint256 initialBalance = 50_000 * 10 ** 6;
         dealERC721(ONCHAIN_MONKEY, alice, 1);
@@ -126,24 +135,40 @@ contract OrderFulfillTestTest is Test {
             recipient: bob,
             additionalParameters: "0x0"
         });
+
         bytes memory makerSignature = signOrder(
             alicePrivateKey,
             makerOrder.hash()
         );
+
+        // Alice own the NFT
+        assertEq(IERC721(ONCHAIN_MONKEY).ownerOf(1), alice);
+
+        // Alice approve the target nft to the orderbook
+        vm.startPrank(alice);
+        IERC721(ONCHAIN_MONKEY).approve(address(testOrderBook), 1);
+        vm.stopPrank();
+
+        // Bob is going to fulfill the order
+        vm.startPrank(bob);
+
+        vm.expectEmit(false, false, false, false);
+        emit ERC721Transferred(alice, bob, 1, ONCHAIN_MONKEY);
 
         testOrderBook.fulfillMakerOrderBid(
             takerOrder,
             makerOrder,
             makerSignature
         );
-        console.logBytes32(
-            testOrderBook.userOrderNonce(alice, makerOrder.orderNonce)
-        );
+        vm.stopPrank();
 
+        // The order should be invalidated
         assertEq(
             testOrderBook.userOrderNonce(alice, makerOrder.orderNonce),
             MAGIC_VALUE_ORDER_NONCE_EXECUTED,
             "maker order should be fulfilled"
         );
+
+        assertEq(IERC721(ONCHAIN_MONKEY).ownerOf(1), bob);
     }
 }
