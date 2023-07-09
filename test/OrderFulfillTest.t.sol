@@ -2,8 +2,7 @@
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
-import "forge-std/console.sol";
-// import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+// import "forge-std/console.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
@@ -263,7 +262,7 @@ contract OrderFulfillTestTest is Test {
             strategyId: 0,
             collectionType: CollectionType.ERC721,
             collection: ONCHAIN_MONKEY,
-            currency: USDT,
+            currency: USDC,
             price: 200 * 10 ** 6, // 200U
             signer: bob,
             startTime: 1672444800, //20230101
@@ -272,15 +271,31 @@ contract OrderFulfillTestTest is Test {
             amounts: amounts
         });
 
+        OrderStructs.Taker memory takerOrder = OrderStructs.Taker({
+            recipient: alice,
+            additionalParameters: "0x0"
+        });
+
         uint256[] memory nonces = new uint256[](1);
-        amounts[0] = 1;
+        nonces[0] = 1;
         vm.startPrank(bob);
+        IERC20(USDC).approve(address(testOrderBook), 200 * 10 ** 6);
+
         vm.expectEmit(false, false, false, false);
         emit OrderNoncesCancelled(bob, nonces);
 
         testOrderBook.cancelOrderNonces(nonces);
         vm.stopPrank();
-    }
 
-    function testUsedOrderNoceShouldFailed() public {}
+        bytes memory makerSignature = signOrder(
+            bobPrivateKey,
+            makerOrder.hash()
+        );
+
+        vm.startPrank(alice);
+        IERC721(ONCHAIN_MONKEY).approve(address(testOrderBook), 1);
+        vm.expectRevert();
+        testOrderBook.fulfillMakerOrder(takerOrder, makerOrder, makerSignature);
+        vm.stopPrank();
+    }
 }
