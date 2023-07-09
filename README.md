@@ -6,7 +6,11 @@ It's the final project for [Appworks Blockchain Program #2](https://school.appwo
 
 This project is a marketplace that supports NFTs (ERC721/ERC1155). Users can list NFTs for trading on this platform. It's developed by referencing the source code of LooksRare, but with some functionalities simplified or modified (self-implemented) for the purpose of learning.
 
-## User Story
+## Flow Chart
+<img width="868" alt="Screenshot 2023-07-09 at 11 45 01 PM" src="https://github.com/moojing/Appworks-Final-Project-NFT-Order-Market/assets/11360957/bc039d7f-2801-4bca-bd17-942df08fa566">
+
+
+
 
 ### Backend (smart contract)
 
