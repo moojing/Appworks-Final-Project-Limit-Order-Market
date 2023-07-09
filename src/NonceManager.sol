@@ -44,7 +44,7 @@ contract NonceManager is INonceManager {
      *      and to prevent revertion if one of the orders is filled in the same
      *      block.
      */
-    function cancelOrderNonces(uint256[] calldata orderNonces) external {
+    function _cancelOrderNonces(uint256[] calldata orderNonces) internal {
         uint256 length = orderNonces.length;
         if (length == 0) {
             revert LengthsInvalid();
@@ -62,6 +62,7 @@ contract NonceManager is INonceManager {
         emit OrderNoncesCancelled(msg.sender, orderNonces);
     }
 
+    // @todo implement subset nonces related function
     // /**
     //  * @notice This function allows a user to cancel an array of subset nonces.
     //  * @param subsetNonces Array of subset nonces

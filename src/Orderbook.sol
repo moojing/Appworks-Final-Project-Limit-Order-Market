@@ -235,4 +235,8 @@ contract Orderbook is NonceManager, StrategyManager, TransferManager {
     ) public returns (bool) {
         return _computeDigestAndVerify(computedHash, makerSignature, signer);
     }
+
+    function cancelOrderNonces(uint256[] calldata orderNonces) external {
+        _cancelOrderNonces(orderNonces);
+    }
 }

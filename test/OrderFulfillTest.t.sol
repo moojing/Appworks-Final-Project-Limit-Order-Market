@@ -46,6 +46,8 @@ contract OrderFulfillTestTest is Test {
         address collectionAddress
     );
 
+    event OrderNoncesCancelled(address user, uint256[] orderNonces);
+
     function setUp() public {
         string memory rpc = vm.envString("NET_RPC_URL");
         vm.createSelectFork(rpc);
@@ -242,6 +244,42 @@ contract OrderFulfillTestTest is Test {
         assertEq(IERC721(ONCHAIN_MONKEY).ownerOf(1), bob);
         assertEq(IERC20(USDT).balanceOf(bob), 50_000 * 10 ** 6 - 200 * 10 ** 6);
         assertEq(IERC20(USDT).balanceOf(alice), 200 * 10 ** 6);
+    }
+
+    function testCancelOrderNonce() public {
+        // create a maker order
+        uint256[] memory itemIds = new uint256[](1);
+        itemIds[0] = 1;
+
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 1;
+
+        // Bob list a bid (buy) order
+        makerOrder = OrderStructs.Maker({
+            orderType: OrderType.Bid,
+            globalNonce: 1,
+            subsetNonce: 1,
+            orderNonce: 1,
+            strategyId: 0,
+            collectionType: CollectionType.ERC721,
+            collection: ONCHAIN_MONKEY,
+            currency: USDT,
+            price: 200 * 10 ** 6, // 200U
+            signer: bob,
+            startTime: 1672444800, //20230101
+            endTime: 1703980800, // 20231231
+            itemIds: itemIds,
+            amounts: amounts
+        });
+
+        uint256[] memory nonces = new uint256[](1);
+        amounts[0] = 1;
+        vm.startPrank(bob);
+        vm.expectEmit(false, false, false, false);
+        emit OrderNoncesCancelled(bob, nonces);
+
+        testOrderBook.cancelOrderNonces(nonces);
+        vm.stopPrank();
     }
 
     function testUsedOrderNoceShouldFailed() public {}
