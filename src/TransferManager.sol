@@ -46,10 +46,20 @@ contract TransferManager is ITransferManager, ReentrancyGuard {
         uint _amount,
         address _tokenAddress
     ) internal {
-        uint256 balance = IERC20(_tokenAddress).balanceOf(_from);
-        require(balance >= _amount, "Not enough balance to transfer");
+        // USDT does not comply with ERC20 standard, so we need to use low lv call
+        uint toBalanceBefore = IERC20(_tokenAddress).balanceOf(_to);
 
-        IERC20(_tokenAddress).transferFrom(_from, _to, _amount);
+        (bool status, ) = _tokenAddress.call(
+            abi.encodeCall(IERC20.transferFrom, (_from, _to, _amount))
+        );
+
+        uint toBalanceAfter = IERC20(_tokenAddress).balanceOf(_to);
+
+        // check the result by comparing the balance, bceause of the bloody USDT.
+        require(
+            toBalanceAfter - toBalanceBefore == _amount,
+            "Transfer ERC20 failed"
+        );
         emit ERC20Transferred(_from, _to, _amount, _tokenAddress);
     }
 

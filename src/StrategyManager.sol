@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-// LooksRare unopinionated libraries
 import {CurrencyManager} from "./CurrencyManager.sol";
 
 // Interfaces
@@ -11,7 +10,6 @@ import {IStrategyManager} from "./interfaces/IStrategyManager.sol";
 /**
  * @title StrategyManager
  * @notice This contract handles the addition and the update of execution strategies.
- * @author LooksRare protocol team (👀,💎)
  */
 contract StrategyManager is IStrategyManager, CurrencyManager {
     /**

@@ -21,8 +21,10 @@ contract CurrencyManager is ICurrencyManager, OwnableTwoSteps {
      * @dev Only callable by owner.
      */
 
-    // @todo only owner
-    function updateCurrencyStatus(address currency, bool isAllowed) external {
+    function updateCurrencyStatus(
+        address currency,
+        bool isAllowed
+    ) external onlyOwner {
         isCurrencyAllowed[currency] = isAllowed;
         emit CurrencyStatusUpdated(currency, isAllowed);
     }

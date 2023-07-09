@@ -36,15 +36,15 @@ contract Orderbook is NonceManager, StrategyManager, TransferManager {
         chainId = block.chainid;
     }
 
-    function fulfillMakerOrderBid(
+    function fulfillMakerOrder(
         OrderStructs.Taker calldata takerOrder,
         OrderStructs.Maker calldata makerOrder,
         bytes calldata makerSignature
     ) public {
         bytes32 orderHash = makerOrder.hash();
-        //@todo check the currency in the order
+
         address currency = makerOrder.currency;
-        console.log("currency", currency);
+        require(isCurrencyAllowed[currency], "Currency is not allowed");
 
         bool result = _computeDigestAndVerify(
             makerOrder.hash(),
@@ -204,12 +204,11 @@ contract Orderbook is NonceManager, StrategyManager, TransferManager {
      * @param makerSignature Signature of the maker
      * @param signer Signer address
      */
-    // @todo : change this to internal
     function _computeDigestAndVerify(
         bytes32 computedHash,
         bytes calldata makerSignature,
         address signer
-    ) public returns (bool) {
+    ) internal returns (bool) {
         if (chainId == block.chainid) {
             // \x19\x01 is the standard encoding prefix
             return
@@ -227,5 +226,13 @@ contract Orderbook is NonceManager, StrategyManager, TransferManager {
         } else {
             revert ChainIdInvalid(block.chainid);
         }
+    }
+
+    function verifyOrderSignature(
+        bytes32 computedHash,
+        bytes calldata makerSignature,
+        address signer
+    ) public returns (bool) {
+        return _computeDigestAndVerify(computedHash, makerSignature, signer);
     }
 }
